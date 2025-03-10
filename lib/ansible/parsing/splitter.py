@@ -77,13 +77,16 @@ def parse_kv(args, check_raw=False):
                 k = x[:pos]
                 v = x[pos + 1:]
 
-                # FIXME: make the retrieval of this list of shell/command options a function, so the list is centralized
                 if check_raw and k not in ('creates', 'removes', 'chdir', 'executable', 'warn', 'stdin', 'stdin_add_newline', 'strip_empty_ends'):
                     raw_params.append(orig_x)
                 else:
                     options[k.strip()] = unquote(v.strip())
             else:
-                raw_params.append(orig_x)
+                # Here we handle the free-form argument and set it to true
+                if check_raw:
+                    raw_params.append(orig_x)
+                else:
+                    options[orig_x.strip()] = True  # Treat free-form args as true
 
         # recombine the free-form params, if any were found, and assign
         # them to a special option for use later by the shell/command module
@@ -91,6 +94,7 @@ def parse_kv(args, check_raw=False):
             options[u'_raw_params'] = join_args(raw_params)
 
     return options
+
 
 
 def _get_quote_state(token, quote_char):
